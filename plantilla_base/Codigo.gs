@@ -1,5 +1,6 @@
 const ID_HOJA_CALCULO = "10D53UC6tnjjzcio7e44JCjtLshT5ITWKEApbuZUxl3s";
 const NOMBRE_HOJA = "Invitados";
+const NOMBRE_HOJA_TEXTOS = "Textos";
 
 
 function ENCODE_WHATSAPP(texto) {
@@ -35,6 +36,7 @@ function doGet(e) {
   template.codigo = datos.codigo;
   template.nombre = datos.nombre;
   template.maximo = datos.maximo;
+  template.textos = obtenerTextos();
 
   return template
     .evaluate()
@@ -102,4 +104,31 @@ function buscarInvitado(codigo) {
   }
   return null;
 
+}
+
+
+/**
+ * Lee la hoja "Textos" (columnas: Texto | Descripcion) y devuelve un objeto
+ * { Anfitrion: "...", Leyenda1: "...", ... } para usar en el template.
+ */
+function obtenerTextos() {
+
+  const hoja = SpreadsheetApp
+    .openById(ID_HOJA_CALCULO)
+    .getSheetByName(NOMBRE_HOJA_TEXTOS);
+
+  if (!hoja) {
+    throw new Error(`No se encontró la hoja llamada "${NOMBRE_HOJA_TEXTOS}"`);
+  }
+
+  const datos = hoja.getDataRange().getDisplayValues();
+  const textos = {};
+
+  for (let i = 1; i < datos.length; i++) {
+    const clave = String(datos[i][0]).trim();
+    if (clave) {
+      textos[clave] = datos[i][1];
+    }
+  }
+  return textos;
 }
